@@ -1,4 +1,4 @@
-#let std-bibliography = bibliography  // Due to argument shadowing.
+#let std-bibliography = bibliography // Due to argument shadowing.
 
 #let font-family = ("P052",)
 
@@ -6,7 +6,7 @@
 
 #let font-size = (
   tiny: 6pt,
-  script: 8pt,  // scriptsize
+  script: 8pt, // scriptsize
   footnote: 9pt, // footnotesize
   small: 10pt,
   normal: 11pt, // normalsize
@@ -56,54 +56,60 @@
   let author-affls = if type(author.affl) == array {
     author.affl
   } else {
-    (author.affl, )
+    (author.affl,)
   }
 
-  let lines = author-affls.map(key => {
-    let affl = affls.at(key)
-    let affl-keys = ("department", "institution", "location")
-    return affl-keys
-      .map(key => {
-        let value = affl.at(key, default: none)
-        if key != "location" {
-          return value
-        }
+  let lines = author-affls
+    .map(key => {
+        let affl = affls.at(key)
+        let affl-keys = ("department", "institution", "location")
+        return affl-keys
+          .map(key => {
+              let value = affl.at(key, default: none)
+              if key != "location" {
+                return value
+              }
 
-        // Location and country on the same line.
-        let country = affl.at("country", default: none)
-        if country == none {
-          return value
-        } else if value == none {
-          return country
-        } else {
-          return value + ", " + country
-        }
+              // Location and country on the same line.
+              let country = affl.at("country", default: none)
+              if country == none {
+                return value
+              } else if value == none {
+                return country
+              } else {
+                return value + ", " + country
+              }
+            })
+          .filter(it => it != none)
+          .join("\n")
       })
-      .filter(it => it != none)
-      .join("\n")
-  }).map(it => emph(it))
+    .map(it => emph(it))
 
-  return block(spacing: 0em, {
-    show par: set block(spacing: 5.5pt)
-    text(size: font-size.normal)[*#author.name*]
-    set par(justify: true, leading: 5pt, first-line-indent: 0pt)
-    text(size: font-size.small)[#lines.join([\ ])]
-  })
+  return block(
+    spacing: 0em,
+    {
+      show par: set block(spacing: 5.5pt)
+      text(size: font-size.normal)[*#author.name*]
+      set par(justify: true, leading: 5pt, first-line-indent: 0pt)
+      text(size: font-size.small)[#lines.join([\ ])]
+    },
+  )
 }
 
 #let make-email(author) = {
   let label = text(size: font-size.small, smallcaps(author.email))
-  return block(spacing: 0em, {
-    // Compensate difference between name and email font sizes (10pt vs 9pt).
-    v(1pt)
-    link("mailto:" + author.email, label)
-  })
+  return block(
+    spacing: 0em,
+    {
+      // Compensate difference between name and email font sizes (10pt vs 9pt).
+      v(1pt)
+      link("mailto:" + author.email, label)
+    },
+  )
 }
 
 #let make-authors(authors, affls) = {
-  let cells = authors
-    .map(it => (make-author(it, affls), make-email(it)))
-    .join()
+  let cells = authors.map(it => (make-author(it, affls), make-email(it))).join()
   return grid(
     columns: (6fr, 4fr),
     align: (left + top, right + top),
@@ -114,11 +120,15 @@
 #let make-title(title, authors, affls, abstract, keywords) = {
   // 1. Title.
   v(31pt - (0.25in + 4.5pt))
-  block(width: 100%, spacing: 0em, {
-    set align(center)
-    set block(spacing: 0em)
-    text(size: 14pt, weight: "bold", title)
-  })
+  block(
+    width: 100%,
+    spacing: 0em,
+    {
+      set align(center)
+      set block(spacing: 0em)
+      text(size: 14pt, weight: "bold", title)
+    },
+  )
 
   // 2. Authors.
   v(23.6pt, weak: true)
@@ -126,24 +136,34 @@
   // 3. Editors if exist.
   // Render abstract.
   v(28.8pt, weak: true)
-  block(spacing: 0em, width: 100%, {
-    set text(size: font-size.small)
-    set par(leading: 0.51em)  // Original 0.55em (or 0.45em?).
-    align(center,
-      text(size: font-size.large, weight: "bold", [*Abstract*]))
-    v(8.2pt, weak: true)
-    pad(left: 20pt, right: 20pt, abstract)
-  })
+  block(
+    spacing: 0em,
+    width: 100%,
+    {
+      set text(size: font-size.small)
+      set par(leading: 0.51em) // Original 0.55em (or 0.45em?).
+      align(
+        center,
+        text(size: font-size.large, weight: "bold", [*Abstract*]),
+      )
+      v(8.2pt, weak: true)
+      pad(left: 20pt, right: 20pt, abstract)
+    },
+  )
 
   // Render keywords if exist.
   if keywords != none {
     keywords = keywords.join([, ])
-    v(6.5pt, weak: true)  // ~1ex
-    block(spacing: 0em, width: 100%, {
-      set text(size: 10pt)
-      set par(leading: 0.51em)  // Original 0.55em (or 0.45em?).
-      pad(left: 20pt, right: 20pt)[*Keywords:* #keywords]
-    })
+    v(6.5pt, weak: true) // ~1ex
+    block(
+      spacing: 0em,
+      width: 100%,
+      {
+        set text(size: 10pt)
+        set par(leading: 0.51em) // Original 0.55em (or 0.45em?).
+        pad(left: 20pt, right: 20pt)[*Keywords:* #keywords]
+      },
+    )
   }
 
   // Space before paper content.
@@ -181,8 +201,7 @@
 
   // Set document metadata.
   let meta-authors = join-authors(authors.map(it => it.name))
-  set document(title: title, author: meta-authors, keywords: keywords,
-               date: date)
+  set document(title: title, author: meta-authors, keywords: keywords, date: date)
 
   set page(
     paper: "us-letter",
@@ -195,10 +214,9 @@
       grid(
         columns: (1fr, 1fr),
         align: (left, right),
-        [],
-        [#pageno])
+        [], [#pageno],
+      )
     }),
-
   )
 
   // Basic paragraph and text settings.
@@ -258,7 +276,12 @@
     set par(leading: 6.67pt, first-line-indent: 0pt)
     let numb = locate(loc => numbering(it.numbering, ..it.counter.at(loc)))
     let index = it.supplement + [~] + numb + it.separator
-    grid(columns: 2, column-gutter: 5pt, align: left, index, it.body)
+    grid(
+      columns: 2,
+      column-gutter: 5pt,
+      align: left,
+      index, it.body,
+    )
   }
 
   make-title(title, authors, affls, abstract, keywords)
@@ -291,7 +314,8 @@
     // TODO(@daskol): Closest bibliography style is "bristol-university-press".
     set std-bibliography(
       title: [References],
-      style: "bristol-university-press")
+      style: "bristol-university-press",
+    )
     bibliography
   }
 }
@@ -312,9 +336,12 @@
 })
 
 // And a function for a proof.
-#let proof(body) = block(spacing: 11.5pt, {
-  emph[Proof.]
-  [ ] + body
-  h(1fr)
-  box(scale(160%, origin: bottom + right, sym.square.stroked))
-})
+#let proof(body) = block(
+  spacing: 11.5pt,
+  {
+    emph[Proof.]
+    [ ] + body
+    h(1fr)
+    box(scale(160%, origin: bottom + right, sym.square.stroked))
+  },
+)

@@ -3,10 +3,12 @@
   (name: "Wingate Peaslee", affl: "one", email: ""),
 )
 #let affls = (
-  one: (department: "Department of Political Economy",
-    institution:"Miskatonic University",
+  one: (
+    department: "Department of Political Economy",
+    institution: "Miskatonic University",
     location: "Arkham, MA",
-    country: "USA"),
+    country: "USA",
+  ),
 )
 
 
